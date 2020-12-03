@@ -1,5 +1,9 @@
 package klasifikasi
 
+import (
+	"errors"
+)
+
 var Cfg config = config{
 	BaseUrl: "https://api.klasifikasi.com",
 }
@@ -22,8 +26,8 @@ func Build(credentials []ClientBuildParams) *Klasifikasi {
 			clientModel := getModelData(clientAuth)
 
 			_modelMapping[clientModel.Model.PublicId] = ModelMapping{
-				Auth:   clientAuth,
-				Client: clientModel,
+				Auth:   clientAuth.Auth,
+				Client: clientModel.Model,
 			}
 
 			instance = &Klasifikasi{
@@ -39,4 +43,14 @@ func Build(credentials []ClientBuildParams) *Klasifikasi {
 
 func (ins *Klasifikasi) GetModels() map[string]ModelMapping {
 	return instance.modelMapping
+}
+
+func (ins *Klasifikasi) Classify(publicId, query string) (ClassifyResponse, error) {
+	var result ClassifyResponse
+	model, exist := ins.modelMapping[publicId]
+	if !exist {
+		return result, errors.New("Model not found !")
+	}
+	result = classify(model.Auth, publicId, query)
+	return result, nil
 }

@@ -36,6 +36,15 @@ type Tag struct {
 }
 
 type ModelMapping struct {
-	Auth   AuthData
-	Client ClientModel
+	Auth   TokenData
+	Client Model
+}
+
+type ClassifyResponse struct {
+	Result []TagResponse `json:"result"`
+}
+
+type TagResponse struct {
+	Label string  `json:"label"`
+	Score float32 `json:"score"`
 }
