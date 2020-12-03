@@ -72,9 +72,10 @@ func getModelData(data AuthData) ClientModel {
 
 }
 
-func classify(token TokenData, publicId, query string) ClassifyResponse {
-	data := map[string]interface{}{"query": query}
+func classify(token TokenData, publicId, query string) (ClassifyResponse, error) {
+	var result ClassifyResponse
 
+	data := map[string]interface{}{"query": query}
 	payload, err := json.Marshal(data)
 	if err != nil {
 		panic(err)
@@ -82,7 +83,7 @@ func classify(token TokenData, publicId, query string) ClassifyResponse {
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v1/classify/%s", Cfg.BaseUrl, publicId), bytes.NewBuffer(payload))
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.Token))
@@ -90,25 +91,25 @@ func classify(token TokenData, publicId, query string) ClassifyResponse {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 	defer res.Body.Close()
 
-	var result ClassifyResponse
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 	err = json.Unmarshal(body, &result)
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 
-	return result
+	return result, err
 
 }
 
-func logs(token TokenData, publicId string, params LogsParams) LogsResponse {
+func logs(token TokenData, publicId string, params LogsParams) (LogsResponse, error) {
+	var result LogsResponse
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/history/%s", Cfg.BaseUrl, publicId), nil)
 	if err != nil {
@@ -128,19 +129,18 @@ func logs(token TokenData, publicId string, params LogsParams) LogsResponse {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 	defer res.Body.Close()
 
-	var result LogsResponse
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 	err = json.Unmarshal(body, &result)
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 
-	return result
+	return result, err
 }

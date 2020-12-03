@@ -47,20 +47,28 @@ func (ins *Klasifikasi) GetModels() map[string]ModelMapping {
 
 func (ins *Klasifikasi) Classify(publicId, query string) (ClassifyResponse, error) {
 	var result ClassifyResponse
+	var err error
 	model, exist := ins.modelMapping[publicId]
 	if !exist {
 		return result, errors.New("Model not found !")
 	}
-	result = classify(model.Auth, publicId, query)
+	result, err = classify(model.Auth, publicId, query)
+	if err != nil {
+		return result, err
+	}
 	return result, nil
 }
 
 func (ins *Klasifikasi) Logs(publicId string, params LogsParams) (LogsResponse, error) {
 	var result LogsResponse
+	var err error
 	model, exist := ins.modelMapping[publicId]
 	if !exist {
 		return result, errors.New("Model not found !")
 	}
-	result = logs(model.Auth, publicId, params)
+	result, err = logs(model.Auth, publicId, params)
+	if err != nil {
+		return result, err
+	}
 	return result, nil
 }
