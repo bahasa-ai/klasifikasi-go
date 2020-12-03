@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 func requestToken(data ClientBuildParams) AuthData {
@@ -105,4 +106,41 @@ func classify(token TokenData, publicId, query string) ClassifyResponse {
 
 	return result
 
+}
+
+func logs(token TokenData, publicId string, params LogsParams) LogsResponse {
+
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/history/%s", Cfg.BaseUrl, publicId), nil)
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.Token))
+
+	q := req.URL.Query()
+	q.Add("startedAt", params.StartedAt.Format(time.RFC3339))
+	q.Add("endedAt", params.EndedAt.Format(time.RFC3339))
+	q.Add("take", fmt.Sprint(params.Take))
+	q.Add("skip", fmt.Sprint(params.Skip))
+	req.URL.RawQuery = q.Encode()
+
+	fmt.Println(req.URL.String())
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer res.Body.Close()
+
+	var result LogsResponse
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		panic(err)
+	}
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		panic(err)
+	}
+
+	return result
 }

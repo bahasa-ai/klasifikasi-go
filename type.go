@@ -1,5 +1,7 @@
 package klasifikasi
 
+import "time"
+
 type ClientBuildParams struct {
 	ClientId     string `json:"clientId"`
 	ClientSecret string `json:"clientSecret"`
@@ -47,4 +49,23 @@ type ClassifyResponse struct {
 type TagResponse struct {
 	Label string  `json:"label"`
 	Score float32 `json:"score"`
+}
+
+type LogsParams struct {
+	StartedAt time.Time
+	EndedAt   time.Time
+	Take      int
+	Skip      int
+}
+
+type LogsResponse struct {
+	Logs []Logs `json:"histories"`
+}
+
+type Logs struct {
+	CreatedAt   string        `json:"createdAt"`
+	UpdatedAt   string        `json:"updatedAt"`
+	Id          int           `json:"id"`
+	Query       string        `json:"query"`
+	ModelResult []TagResponse `json:"modelResult"`
 }
