@@ -95,7 +95,7 @@ func classify(token TokenData, publicId, query string) (ClassifyResponse, error)
 	data := map[string]interface{}{"query": query}
 	payload, err := json.Marshal(data)
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v1/classify/%s", Cfg.BaseUrl, publicId), bytes.NewBuffer(payload))
@@ -138,7 +138,7 @@ func logs(token TokenData, publicId string, params LogsParams) (LogsResponse, er
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/history/%s", Cfg.BaseUrl, publicId), nil)
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.Token))
 
@@ -148,8 +148,6 @@ func logs(token TokenData, publicId string, params LogsParams) (LogsResponse, er
 	q.Add("take", fmt.Sprint(params.Take))
 	q.Add("skip", fmt.Sprint(params.Skip))
 	req.URL.RawQuery = q.Encode()
-
-	fmt.Println(req.URL.String())
 
 	client := &http.Client{}
 	res, err := client.Do(req)
