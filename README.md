@@ -3,11 +3,13 @@
 Official [Klasifikasi](https://klasifikasi.com/) API Client Library
 
 ## Installation
+
 install klasifikasi-go with:
 
 `go get -u github.com/bahasa-ai/klasifikasi-go`
 
 then, you can import it like this
+
 ```go
 import (
 	klasifikasi "github.com/bahasa-ai/klasifikasi-go"
@@ -29,6 +31,7 @@ clientCredentials := []klasifikasiClientBuildParams{
 klasifikasiInstance := klasifikasi.Build(clientCredentials)
 
 ```
+
 You can pass multiple `clientId` & `clientSecret` too
 
 ```go
@@ -39,7 +42,7 @@ clientCredentials := []klasifikasiClientBuildParams{
   },
   {
     ClientId:     "client-id-2",
-    ClientSecret: "client-secret-2", 
+    ClientSecret: "client-secret-2",
   }
 }
 klasifikasiInstance := klasifikasi.Build(clientCredentials)
@@ -47,7 +50,10 @@ klasifikasiInstance := klasifikasi.Build(clientCredentials)
 ```
 
 ## Classify
-You will need you model `publicId` to start classifying with your model. You can get your model `publicId` from your model page, or you can get it from here :
+
+You will need you model `publicId` to start classifying with your model. You can
+get your model `publicId` from your model page, or you can get it from here :
+
 ```go
 models := klasifikasiInstance.GetModels()
 for publicId := range models {
@@ -56,6 +62,7 @@ for publicId := range models {
 ```
 
 Classifying example
+
 ```go
 result, _ := klasifikasiInstance.Classify("publicId", "your query")
 for _, labelResult := range result.Result {
@@ -69,7 +76,9 @@ for _, labelResult := range result.Result {
 ```
 
 ## Logs
+
 You can get your classifying logs based on your model `publicId`
+
 ```go
 
 startedAt,_ := time.Parse("January 2 2006", "December 1 2020")
@@ -91,7 +100,7 @@ for _, data := range logs.Logs {
   //   Query:sucksee
   //    ModelResult:[
   //     {
-  //        Label:Sedih 
+  //        Label:Sedih
   //        Score:0.94172746
   //     }
   //     {
@@ -104,7 +113,10 @@ for _, data := range logs.Logs {
 ```
 
 ## Error
-`Classify` & `Logs` function will return an error if something bad happen, always check the error variable
+
+`Classify` & `Logs` function will return an error if something bad happen,
+always check the error variable
+
 ```go
 result, err := klasifikasiInstance.Classify("publicId", "your query")
 if err != nil {
