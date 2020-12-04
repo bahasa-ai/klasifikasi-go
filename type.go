@@ -12,8 +12,7 @@ type config struct {
 }
 
 type AuthData struct {
-	Auth  TokenData `json:"auth"`
-	Error string    `json:"error"`
+	Auth TokenData `json:"auth"`
 }
 
 type TokenData struct {
@@ -68,4 +67,8 @@ type Logs struct {
 	Id          int           `json:"id"`
 	Query       string        `json:"query"`
 	ModelResult []TagResponse `json:"modelResult"`
+}
+
+type APIError struct {
+	Message string `json:"error"`
 }
