@@ -2,6 +2,7 @@ package klasifikasi
 
 import (
 	"errors"
+	"time"
 )
 
 var Cfg config = config{
@@ -26,8 +27,9 @@ func Build(credentials []ClientBuildParams) *Klasifikasi {
 			clientModel := getModelData(clientAuth)
 
 			_modelMapping[clientModel.Model.PublicId] = ModelMapping{
-				Auth:   clientAuth.Auth,
-				Client: clientModel.Model,
+				Auth:       clientAuth.Auth,
+				Client:     clientModel.Model,
+				ClientData: data,
 			}
 
 			instance = &Klasifikasi{
@@ -52,6 +54,14 @@ func (ins *Klasifikasi) Classify(publicId, query string) (ClassifyResponse, erro
 	if !exist {
 		return result, errors.New("Model not found !")
 	}
+
+	expired := time.Unix(0, int64(model.Auth.ExpiredAfter)*int64(time.Millisecond))
+
+	if time.Now().After(expired) {
+		clientAuth := requestToken(model.ClientData)
+		model.Auth = clientAuth.Auth
+	}
+
 	result, err = classify(model.Auth, publicId, query)
 	if err != nil {
 		return result, err
@@ -66,6 +76,14 @@ func (ins *Klasifikasi) Logs(publicId string, params LogsParams) (LogsResponse, 
 	if !exist {
 		return result, errors.New("Model not found !")
 	}
+
+	expired := time.Unix(0, int64(model.Auth.ExpiredAfter)*int64(time.Millisecond))
+
+	if time.Now().After(expired) {
+		clientAuth := requestToken(model.ClientData)
+		model.Auth = clientAuth.Auth
+	}
+
 	result, err = logs(model.Auth, publicId, params)
 	if err != nil {
 		return result, err
