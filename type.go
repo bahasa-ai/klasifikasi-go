@@ -37,8 +37,9 @@ type Tag struct {
 }
 
 type ModelMapping struct {
-	Auth   TokenData
-	Client Model
+	Auth       TokenData
+	Client     Model
+	ClientData ClientBuildParams
 }
 
 type ClassifyResponse struct {
