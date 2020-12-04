@@ -3,6 +3,7 @@ package klasifikasi
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -10,6 +11,8 @@ import (
 )
 
 func requestToken(data ClientBuildParams) AuthData {
+	var result AuthData
+	var error APIError
 
 	payload, err := json.Marshal(data)
 	if err != nil {
@@ -29,10 +32,16 @@ func requestToken(data ClientBuildParams) AuthData {
 	}
 	defer res.Body.Close()
 
-	var result AuthData
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		panic(err)
+	}
+	if res.StatusCode != 200 {
+		err = json.Unmarshal(body, &error)
+		if err != nil {
+			panic(err)
+		}
+		panic(error.Message)
 	}
 	err = json.Unmarshal(body, &result)
 	if err != nil {
@@ -40,10 +49,11 @@ func requestToken(data ClientBuildParams) AuthData {
 	}
 
 	return result
-
 }
 
 func getModelData(data AuthData) ClientModel {
+	var result ClientModel
+	var error APIError
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/auth/activeClient", Cfg.BaseUrl), nil)
 	if err != nil {
@@ -58,10 +68,16 @@ func getModelData(data AuthData) ClientModel {
 	}
 	defer res.Body.Close()
 
-	var result ClientModel
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		panic(err)
+	}
+	if res.StatusCode != 200 {
+		err = json.Unmarshal(body, &error)
+		if err != nil {
+			panic(err)
+		}
+		panic(error.Message)
 	}
 	err = json.Unmarshal(body, &result)
 	if err != nil {
@@ -72,17 +88,19 @@ func getModelData(data AuthData) ClientModel {
 
 }
 
-func classify(token TokenData, publicId, query string) ClassifyResponse {
-	data := map[string]interface{}{"query": query}
+func classify(token TokenData, publicId, query string) (ClassifyResponse, error) {
+	var result ClassifyResponse
+	var error APIError
 
+	data := map[string]interface{}{"query": query}
 	payload, err := json.Marshal(data)
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v1/classify/%s", Cfg.BaseUrl, publicId), bytes.NewBuffer(payload))
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.Token))
@@ -90,29 +108,37 @@ func classify(token TokenData, publicId, query string) ClassifyResponse {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 	defer res.Body.Close()
 
-	var result ClassifyResponse
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		panic(err)
+		return result, err
+	}
+	if res.StatusCode != 200 {
+		err = json.Unmarshal(body, &error)
+		if err != nil {
+			return result, err
+		}
+		return result, errors.New(fmt.Sprintf("(%d) %s", res.StatusCode, error.Message))
 	}
 	err = json.Unmarshal(body, &result)
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 
-	return result
+	return result, err
 
 }
 
-func logs(token TokenData, publicId string, params LogsParams) LogsResponse {
+func logs(token TokenData, publicId string, params LogsParams) (LogsResponse, error) {
+	var result LogsResponse
+	var error APIError
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/history/%s", Cfg.BaseUrl, publicId), nil)
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.Token))
 
@@ -123,24 +149,28 @@ func logs(token TokenData, publicId string, params LogsParams) LogsResponse {
 	q.Add("skip", fmt.Sprint(params.Skip))
 	req.URL.RawQuery = q.Encode()
 
-	fmt.Println(req.URL.String())
-
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 	defer res.Body.Close()
 
-	var result LogsResponse
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		panic(err)
+		return result, err
+	}
+	if res.StatusCode != 200 {
+		err = json.Unmarshal(body, &error)
+		if err != nil {
+			return result, err
+		}
+		return result, errors.New(fmt.Sprintf("(%d) %s", res.StatusCode, error.Message))
 	}
 	err = json.Unmarshal(body, &result)
 	if err != nil {
-		panic(err)
+		return result, err
 	}
 
-	return result
+	return result, err
 }
