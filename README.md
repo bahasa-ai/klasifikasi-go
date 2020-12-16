@@ -1,7 +1,9 @@
-# Klasifikasi for Node.js
+# Klasifikasi for Golang
 
 Official [Klasifikasi](https://klasifikasi.com/) API Client Library
 
+## Requirements
+Go v1.13
 ## Installation
 install klasifikasi-go with:
 
@@ -20,7 +22,7 @@ You will need valid `clientId` & `clientSecret` of your model. You can get those
 from credential section at your model page, which is both unique per model.
 
 ```go
-clientCredentials := []klasifikasiClientBuildParams{
+clientCredentials := []klasifikasi.ClientBuildParams{
   {
     ClientId:     "client-id",
     ClientSecret: "client-secret"
@@ -32,7 +34,7 @@ klasifikasiInstance := klasifikasi.Build(clientCredentials)
 You can pass multiple `clientId` & `clientSecret` too
 
 ```go
-clientCredentials := []klasifikasiClientBuildParams{
+clientCredentials := []klasifikasi.ClientBuildParams{
   {
     ClientId:     "client-id-1",
     ClientSecret: "client-secret-1",
